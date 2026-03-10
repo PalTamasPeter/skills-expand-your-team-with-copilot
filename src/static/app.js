@@ -472,6 +472,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Generate Twitter/X share URL for an activity
+  function getTwitterShareUrl(name) {
+    const text = `Check out "${name}" at Mergington High School! 🎓`;
+    const url = getActivityUrl(name);
+    return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+  }
+
+  // Generate Facebook share URL for the current page
+  function getFacebookShareUrl(name) {
+    return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getActivityUrl(name))}`;
+  }
+
+  // Generate a URL that links to the specific activity using a hash
+  function getActivityUrl(name) {
+    const base = window.location.origin + window.location.pathname;
+    return `${base}#${encodeURIComponent(name)}`;
+  }
+
+  // Copy activity link to clipboard
+  async function copyActivityLink(activityName) {
+    const url = getActivityUrl(activityName);
+    try {
+      await navigator.clipboard.writeText(url);
+      showMessage(`Link for "${activityName}" copied to clipboard!`, "success");
+    } catch {
+      showMessage("Could not copy link. Please copy the URL from your browser.", "error");
+    }
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -569,6 +598,12 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-buttons">
+        <span class="share-label">Share:</span>
+        <a class="share-btn share-twitter" href="${getTwitterShareUrl(name)}" target="_blank" rel="noopener noreferrer" aria-label="Share on X (Twitter)">𝕏</a>
+        <a class="share-btn share-facebook" href="${getFacebookShareUrl(name)}" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">f</a>
+        <button class="share-btn share-copy" data-activity="${name}" aria-label="Copy link">🔗</button>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -586,6 +621,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handler for copy link button
+    const copyButton = activityCard.querySelector(".share-copy");
+    copyButton.addEventListener("click", () => copyActivityLink(name));
 
     activitiesList.appendChild(activityCard);
   }
